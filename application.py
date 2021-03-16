@@ -89,8 +89,8 @@ def createMedia():
 				"message": "failed to create audiobook. Did you include all params?"
 				}), 422
 
-@app.route("/get/<audio_type>")
-@app.route("/get/<audio_type>/<int:resource_id>", methods=['GET','DELETE'])
+@app.route("/<audio_type>")
+@app.route("/<audio_type>/<int:resource_id>", methods=['GET','DELETE'])
 def get_audio(audio_type, resource_id=None):
 	audio_type=audio_type.lower()
 	if request.method == 'DELETE':
