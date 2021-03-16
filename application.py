@@ -12,18 +12,20 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///audio.sqlite3'
 db.init_app(app)
 
-
+# The create route will allo only a POST request
 @app.route("/create", methods=["POST"])
 def createMedia():
+	# Get args from incoming request for all possible params
 	resource_type = request.args.get('type')
 	resource_type=resource_type.lower()
 	title = request.args.get('title')
-	print(title)
 	duration= request.args.get('duration')
 	host = request.args.get('host')
 	participants = request.args.get('participants')
 	narrator= request.args.get('narrator')
 	author = request.args.get('author')
+
+	# To handle Song audio type creation
 
 	if resource_type == "song":
 		title = title
@@ -46,6 +48,8 @@ def createMedia():
 			return jsonify({
 				"message": "failed to create song"
 				})
+	# For Podcast audio type creation
+
 	elif resource_type == "podcast":
 		title = title
 		duration= int(duration)
@@ -67,6 +71,8 @@ def createMedia():
 			return jsonify({
 				"message": "failed to create podcast. Did you include all params?"
 				}), 422
+	# For audiobook type creation
+
 	elif resource_type == "audiobook":
 		title = title
 		duration= int(duration)
@@ -88,9 +94,13 @@ def createMedia():
 			return jsonify({
 				"message": "failed to create audiobook. Did you include all params?"
 				}), 422
-
+# This method will take 2 routes, dependent on URL variables
+# To List all audio type of type audio_type
 @app.route("/<audio_type>")
+# To get resource of type audio_type and id
+# Added the DELET HTTP method as they take the same params at the GET method
 @app.route("/<audio_type>/<int:resource_id>", methods=['GET','DELETE'])
+# id defaults to None
 def get_audio(audio_type, resource_id=None):
 	audio_type=audio_type.lower()
 	if request.method == 'DELETE':
@@ -161,6 +171,7 @@ def get_audio(audio_type, resource_id=None):
 				return jsonify({
 					"error": "No resource of type song found"
 					}), 404
+# Create a list of all in the query object
 			result=[]
 			for song in resource:
 				title = song.song_title
@@ -169,6 +180,7 @@ def get_audio(audio_type, resource_id=None):
 				result.append(title)
 				result.append(duration)
 				result.append(date)
+# Create a dict and append the list
 			data = {}
 			for x in result:
 				data["song"]=result
@@ -249,6 +261,9 @@ def get_audio(audio_type, resource_id=None):
 			return data
 		except exc.SQLAlchemyError as error:
 			print(error)
+
+# Updating any resource type with PUT
+# The route only allows PUT request method
 @app.route('/<audio_type>/<int:resource_id>', methods=['PUT'])
 def updateResource(audio_type, resource_id):
 	title = request.args.get('title')
